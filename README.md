@@ -257,6 +257,7 @@ contract Register {
 
 <--Speedrun first session-->
 https://youtu.be/johpGi8HS4U?si=W4LpvFTZ0X1aTbTT
+https://youtu.be/johpGi8HS4U?si=sX3LZToM4ktS2Ud9
 
 HOY INICIA EL SPEED RUN ETHEREUM
 ---------------
