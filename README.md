@@ -251,6 +251,163 @@ contract Register {
 
 ==================
 
+Third session
+
+Curso Solidity Básico Clase 3 | 28 de Octubre 2023
+
+
+https://chain.link/ Sitio web de Chainlink
+https://research.chain.link/whitepaper-v2.pdf Whitepaper de Chainlink
+
+https://moralis.io/ 
+
+Únete a mi grupo de WhatsApp. https://chat.whatsapp.com/HxIGTazmPGgKlxrsFVmZ6B
+
+Henry Velásquez Y.
+Juan Pablo Velasquez Camargo
+Felipe Madrigal
+Juan Pablo Bernal Cardona
+Laura Stefania Zea
+Karlimar Piza Gamboa
+Rafael Antonio Camargo
+Daniel Alberto Franco Cabrera
+José Orlando Guevada Pedraza
+Carlos Andres Monroy Martinez
+Diego Felipe Alarcon Osorio
+Rocío Elena Grajales Mesa
+Hector David Puentes
+Dannuver Cabezas
+Alexander Aponte M.
+Andres Giovanny Aponte
+Juan Manuel Perez Rincon
+Daniel Felipe Donoso Castiblanco
+Sheryll Davina Vargas Ortiz
+Martha Tatiana Díaz Urreg
+Samuel Alejandro Bermúdez Piñeros
+Ivan Santiago Romero Cepeda
+Andres Felipe Ramos Reyes
+Angélica Guevara Bernal
+Juan Leonardo Ramirez Velasquez
+Tannia Marcela Vega Buitrago
+Juan Sebastian Vargas Ospina
+Andrés Felipe Medina Bernal
+Luis Miguel Taque Diaz
+Juan Felipe Pedroza
+Daniel Felipe Arevalo Benavides
+Gustavo Alejandro Moreno Munevar
+Sebastián Carrera
+Juan Felipe Jimenez Pacheco
+Carlos Esteban Leon Pinilla
+JOse Antonio VIancha
+David Mejia
+David Millan
+Julian Humberto Astroz Restrepo
+David Mejia
+jahir López cristancho
+Miguel Angel Burgos Rojas
+DAvid Fernando Mejia
+
+==================
+//SPDX-License-Identifier: MIT
+pragma solidity 0.8.19;
+
+
+contract Contract_tarea {
+
+        string nombre = "Pablo Perez";
+        string correo = "mail@mail.com";
+
+        function leerNombre() public view returns (string memory) {
+            return nombre;
+        }
+
+        function guardarNombre(string memory nuevoNombre) public {
+            nombre = nuevoNombre;
+        }
+
+        function leerCorreo() public view returns (string memory) {
+            return correo;
+        }
+
+        function guardarCorreo(string memory nuevoCorreo) public {
+            correo = nuevoCorreo;
+        }
+
+}
+
+==================
+
+==================
+
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
+
+contract Register {
+        string private info;
+        uint public countChanges; // = 0; (redundante)
+        int256 withNegativeNumbers;
+        address owner;
+
+        constructor() {
+            info = "Oscar";
+            owner = msg.sender;
+        }
+
+        function getInfo() public view returns(string memory) {
+            return info;
+        }
+
+        // MODIFIER
+        // Sirve para extender la funcionalidad de un método
+        // Se pueden hacer validaciones (multiples) antes de que se ejecute el metodo
+        modifier ValidarQueNoEsElOwner {
+            // Require
+            require(owner == msg.sender, "No eres el owner del contrato");
+            // Revert
+            // require(owner == msg.sender, "No eres el owner del contrato");
+            // if (owner != msg.sender) revert("No eres el owner del contrato");
+            // // Revert con error personalizado
+            // // Nuevo estandar - menos costos
+            // if (owner != msg.sender) revert NoEsElOwner();
+        
+            // Indica se debe ejecutar el metodo
+            _;
+        }
+    
+        // error NoEsElOwner();
+        // Este error se dispara en revert NoEsElOwner();
+
+        modifier ValidarSiCadenaEstaVacia(string memory _info) {
+            require(bytes(_info).length > 0, "La cadena esta vacia");
+            _;
+        }
+
+        // Eventos
+        // - Es una manera de propagar informacion del smart contract hacia afuera
+        // - Otros agentes (backned, frontendt) pueden suscribirse para escuchar los eventos
+        // - Todos los eventos se guardan en el blockchain
+        // - Se usa como storage barato para guardar informacion
+        // - Usando JS pueden hacer queries (como si fuera SQL) a los eventos pasados
+        // - Otros contratos inteligentes no pueden escuchar eventos
+        event InfoChange(string oldInfo, string newInfo);
+
+        function setInfo(
+            string memory _info
+        ) external  
+            ValidarQueNoEsElOwner 
+            ValidarSiCadenaEstaVacia(_info) {
+                emit InfoChange(info, _info);
+                info = _info;
+                ++countChanges; // <= este es el menos costos
+        }
+
+}
+
+==================
+
+
+
+
 
 
 
