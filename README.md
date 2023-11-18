@@ -405,6 +405,427 @@ contract Register {
 
 ==================
 
+Curso Solidity Básico Clase 4 | 4 de Noviembre 2023
+
+https://bittensor.com/ proyecto interesante de IA y bockchain
+https://youtu.be/HrQr8KQ102E Video Workshop 2 SpeedrunEthereum Reto 1 Noviembre 4
+https://push.org/ Website Push Protocol
+https://push.org/docs/ Documentación Push
+
+https://www.openzeppelin.com/contracts Revisar esta página (Vamos a empezar a usar sus contratos en la próxima clase)
+
+https://wizard.openzeppelin.com/ --- base de c}reación de smart contracts
+
+Henry Velásquez Y
+Daniel Alberto Franco Cabrera
+Juan Pablo Velasquez Camargo
+Julio César Arango
+Andres Felipe Ramos
+Karlimar Piza Gamboa
+José Orlando Guevada Pedraza
+Edgardo Mendez
+Diego Felipe Alarcon Osorio
+Daniel Felipe Arevalo Benavides
+Adriana Manzano Rojas
+Juan Sebastián Carrera Lozano
+Jose Antonio Viancha
+David Mejia Bonilla
+Santiago Montenegro Novoa
+Wilson Mauro Rojas Reales
+Hector David Puentes Caceres
+Julian Humberto Astroz Restrepo
+Daniel Felipe Donoso Castiblanco
+Sheryll Davina Vargas Ortiz
+Dannuver Cabezas
+Luis Miguel Taque Diaz
+Sebastián Guaqueta
+ALexander Aponte M.
+joann cruz
+David Millan
+vanessa donoso
+Carlos Andres Monroy Martinez
+cz
+Martha Tatiana Díaz Urrego
+Juan Felipe Jimenez Pacheco
+Samuel Alejandro Bermúdez Piñeros 
+Ivan Santiago Romero Cepeda
+Angelica Guevara
+Miguel Angel Burgos Rojas
+Oscar Eduardo Jaramillo
+AndresAponta
+
+==================
+
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
+
+contract Register {
+        string private info;
+        uint public countChanges; // = 0; (redundante)
+        int256 withNegativeNumbers;
+        address owner;
+
+        constructor() {
+            info = "Control Asistencia Tadeo";
+            owner = msg.sender;
+        }
+
+        function getInfo() public view returns(string memory) {
+            return info;
+        }
+
+        // MODIFIER
+        // Sirve para extender la funcionalidad de un método
+        // Se pueden hacer validaciones (multiples) antes de que se ejecute el metodo
+        modifier ValidarQueNoEsElOwner {
+            // Require
+            require(owner == msg.sender, "No eres el owner del contrato");
+            // Revert
+            // require(owner == msg.sender, "No eres el owner del contrato");
+            // if (owner != msg.sender) revert("No eres el owner del contrato");
+            // // Revert con error personalizado
+            // // Nuevo estandar - menos costos
+            // if (owner != msg.sender) revert NoEsElOwner();
+        
+            // Indica se debe ejecutar el metodo
+            _;
+        }
+    
+        // error NoEsElOwner();
+        // Este error se dispara en revert NoEsElOwner();
+
+        modifier ValidarSiCadenaEstaVacia(string memory _info) {
+            require(bytes(_info).length > 0, "La cadena esta vacia");
+            _;
+        }
+
+        // Eventos
+        // - Es una manera de propagar informacion del smart contract hacia afuera
+        // - Otros agentes (backned, frontendt) pueden suscribirse para escuchar los eventos
+        // - Todos los eventos se guardan en el blockchain
+        // - Se usa como storage barato para guardar informacion
+        // - Usando JS pueden hacer queries a los eventos pasados
+        // - Otros contratos inteligentes no pueden escuchar eventos
+        event InfoChange(string oldInfo, string newInfo);
+
+        function setInfo(
+            string memory _info
+        ) external  
+            ValidarQueNoEsElOwner 
+            ValidarSiCadenaEstaVacia(_info) {
+                emit InfoChange(info, _info);
+                info = _info;
+                ++countChanges; // <= este es el menos costos
+        }
+
+}
+
+
+
+Al llamar a cada función, podemos ver que la función public usa mas gas, mientras que la función external usa menos.
+
+La diferencia se debe a que en las funciones públicas, Solidity copia inmediatamente los argumentos de la matriz en la memoria, mientras que las funciones externas pueden leer directamente desde los datos de llamada. La asignación de memoria es costosa, mientras que la lectura de datos de llamadas es barata.
+
+La razón por la que las funciones públicas necesitan escribir todos los argumentos en la memoria es que las funciones públicas pueden llamarse internamente, lo que en realidad es un proceso completamente diferente al de las llamadas externas. Las llamadas internas se ejecutan mediante saltos en el cód1os a la memoria. Por lo tanto, cuando el compilador genera el código para una función interna, esa función espera que sus argumentos estén ubicados en la memoria.
+
+Para funciones externas, el compilador no necesita permitir llamadas internas, por lo que permite leer los argumentos directamente desde calldata, ahorrando el paso de copia.
+
+En cuanto a las mejores prácticas, debe usar external si espera que la función solo se llame externamente y usar public si necesita llamar a la función internamente. Casi nunca tiene sentido utilizar el patrón this.f(), ya que requiere la ejecución de una CALL real, lo cual es costoso. Además, pasar matrices mediante este método sería mucho más costoso que pasarlas internamente.
+
+Básicamente, verá beneficios de rendimiento con external cada vez que solo llame a una función externamente y pase una gran cantidad de datos de llamada (por ejemplo, matrices grandes).
+
+Ejemplos para diferenciar:
+
+public: todos pueden acceder
+
+external: no se puede acceder internamente, solo externamente
+
+internal: solo este contrato y los contratos que se derivan de él pueden acceder
+
+private: solo se puede acceder desde este contrato
+
+Version 1 Register Gas = 0.001661060005979816
+Version 2 REgister Gas = 0.001661060005979816
+
+///// El ejemplo | PushTokenDemo.sol
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+// PUSH Comm Contract Interface
+interface IPUSHCommInterface {
+    function sendNotification(address _channel, address _recipient, bytes calldata _identity) external;
+}
+
+contract PushTokenDemo is ERC20 {
+
+    using Strings for address;
+    using Strings for uint;
+
+    // EPNS COMM ADDRESS ON ETHEREUM KOVAN, CHECK THIS: https://docs.epns.io/developers/developer-tooling/epns-smart-contracts/epns-contract-addresses
+    address public EPNS_COMM_ADDRESS = 0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa; // 
+
+    constructor() ERC20("Push Token Demo", "PUSHDEMO") {
+        _mint(msg.sender, 1000 * 10 ** uint(decimals()));
+    }
+
+    function transfer(address to, uint amount) override public returns (bool success) {
+        address owner = _msgSender();
+        _transfer(owner, to, amount);
+
+        //"0+3+Hooray! ", msg.sender, " sent ", token amount, " PUSH to you!"
+        IPUSHCommInterface(EPNS_COMM_ADDRESS).sendNotification(
+            0x28400aa592483d6DC6776B82B25dD2E517863050, // from channel
+            to, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
+            bytes(
+                string(
+                    // We are passing identity here: https://docs.push.org/developers/developer-guides/sending-notifications/notification-payload-types/notification-standard-advanced/notification-identity
+                    abi.encodePacked(
+                        "0", // this is notification identity: https://docs.push.org/developers/developer-guides/sending-notifications/notification-payload-types/notification-standard-advanced/notification-identity
+                        "+", // segregator
+                        "3", // this is payload type: https://docs.push.org/developers/developer-guides/sending-notifications/notification-payload-types/notification-standard-advanced/notification-payload (1, 3 or 4) = (Broadcast, targetted or subset)
+                        "+", // segregator
+                        "Tranfer Alert", // this is notificaiton title
+                        "+", // segregator
+                        "Hooray! ", // notification body
+                        owner.toHexString(), // notification body
+                        " sent ", // notification body
+                        (amount / (10 ** uint(decimals()))).toString(), // notification body
+                        " PUSH to you!" // notification body
+                    )
+                )
+            )
+        );
+        
+        return true;
+    }
+
+}
+
+
+https://app.push.org/send ----- PRODUCCION
+
+https://medium.com/@sebasguaqueta.eth/una-gu%C3%ADa-f%C3%A1cil-para-entender-c%C3%B3mo-funcionan-las-comunicaciones-descentralizadas-a-trav%C3%A9s-de-push-y-de4cdbc7caf8
+
+
+https://staging.push.org/channels ----- TESTNET
+
+
+https://docs.push.org/developers/developer-guides/sending-notifications/using-subgraph-gasless
+
+
+
+
+Curso Solidity Básico Clase 4 | 4 de Noviembre 2023
+
+https://bittensor.com/ proyecto interesante de IA y bockchain
+https://youtu.be/HrQr8KQ102E Video Workshop 2 SpeedrunEthereum Reto 1 Noviembre 4
+https://push.org/ Website Push Protocol
+https://push.org/docs/ Documentación Push
+
+https://www.openzeppelin.com/contracts Revisar esta página (Vamos a empezar a usar sus contratos en la próxima clase)
+
+https://wizard.openzeppelin.com/ --- base de creación de smart contracts
+
+Henry Velásquez Y
+Daniel Alberto Franco Cabrera
+Juan Pablo Velasquez Camargo
+Julio César Arango
+Andres Felipe Ramos
+Karlimar Piza Gamboa
+José Orlando Guevada Pedraza
+Edgardo Mendez
+Diego Felipe Alarcon Osorio
+Adriana Manzano Rojas
+Juan Sebastián Carrera Lozano
+Jose Antonio Viancha
+David Mejia Bonilla
+Santiago Montenegro Novoa
+Wilson Mauro Rojas Reales
+Hector David Puentes Caceres
+Julian Humberto Astroz Restrepo
+Daniel Felipe Donoso Castiblanco
+Sheryll Davina Vargas Ortiz
+Dannuver Cabezas
+Luis Miguel Taque Diaz
+Sebastián Guaqueta
+ALexander Aponte M.
+joann cruz
+David Millan
+Carlos Andres Monroy Martinez
+cz
+Martha Tatiana Díaz Urrego
+Juan Felipe Jimenez Pacheco
+Samuel Alejandro Bermúdez Piñeros 
+Ivan Santiago Romero Cepeda
+Angelica Guevara
+Miguel Angel Burgos Rojas
+
+==================
+
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
+
+contract Register {
+        string private info;
+        uint public countChanges; // = 0; (redundante)
+        int256 withNegativeNumbers;
+        address owner;
+
+        constructor() {
+            info = "Control Asistencia Tadeo";
+            owner = msg.sender;
+        }
+
+        function getInfo() public view returns(string memory) {
+            return info;
+        }
+
+        // MODIFIER
+        // Sirve para extender la funcionalidad de un método
+        // Se pueden hacer validaciones (multiples) antes de que se ejecute el metodo
+        modifier ValidarQueNoEsElOwner {
+            // Require
+            require(owner == msg.sender, "No eres el owner del contrato");
+            // Revert
+            // require(owner == msg.sender, "No eres el owner del contrato");
+            // if (owner != msg.sender) revert("No eres el owner del contrato");
+            // // Revert con error personalizado
+            // // Nuevo estandar - menos costos
+            // if (owner != msg.sender) revert NoEsElOwner();
+        
+            // Indica se debe ejecutar el metodo
+            _;
+        }
+    
+        // error NoEsElOwner();
+        // Este error se dispara en revert NoEsElOwner();
+
+        modifier ValidarSiCadenaEstaVacia(string memory _info) {
+            require(bytes(_info).length > 0, "La cadena esta vacia");
+            _;
+        }
+
+        // Eventos
+        // - Es una manera de propagar informacion del smart contract hacia afuera
+        // - Otros agentes (backned, frontendt) pueden suscribirse para escuchar los eventos
+        // - Todos los eventos se guardan en el blockchain
+        // - Se usa como storage barato para guardar informacion
+        // - Usando JS pueden hacer queries a los eventos pasados
+        // - Otros contratos inteligentes no pueden escuchar eventos
+        event InfoChange(string oldInfo, string newInfo);
+
+        function setInfo(
+            string memory _info
+        ) external  
+            ValidarQueNoEsElOwner 
+            ValidarSiCadenaEstaVacia(_info) {
+                emit InfoChange(info, _info);
+                info = _info;
+                ++countChanges; // <= este es el menos costos
+        }
+
+}
+
+
+
+Al llamar a cada función, podemos ver que la función public usa mas gas, mientras que la función external usa menos.
+
+La diferencia se debe a que en las funciones públicas, Solidity copia inmediatamente los argumentos de la matriz en la memoria, mientras que las funciones externas pueden leer directamente desde los datos de llamada. La asignación de memoria es costosa, mientras que la lectura de datos de llamadas es barata.
+
+La razón por la que las funciones públicas necesitan escribir todos los argumentos en la memoria es que las funciones públicas pueden llamarse internamente, lo que en realidad es un proceso completamente diferente al de las llamadas externas. Las llamadas internas se ejecutan mediante saltos en el cód1os a la memoria. Por lo tanto, cuando el compilador genera el código para una función interna, esa función espera que sus argumentos estén ubicados en la memoria.
+
+Para funciones externas, el compilador no necesita permitir llamadas internas, por lo que permite leer los argumentos directamente desde calldata, ahorrando el paso de copia.
+
+En cuanto a las mejores prácticas, debe usar external si espera que la función solo se llame externamente y usar public si necesita llamar a la función internamente. Casi nunca tiene sentido utilizar el patrón this.f(), ya que requiere la ejecución de una CALL real, lo cual es costoso. Además, pasar matrices mediante este método sería mucho más costoso que pasarlas internamente.
+
+Básicamente, verá beneficios de rendimiento con external cada vez que solo llame a una función externamente y pase una gran cantidad de datos de llamada (por ejemplo, matrices grandes).
+
+Ejemplos para diferenciar:
+
+public: todos pueden acceder
+
+external: no se puede acceder internamente, solo externamente
+
+internal: solo este contrato y los contratos que se derivan de él pueden acceder
+
+private: solo se puede acceder desde este contrato
+
+Version 1 Register Gas = 0.001661060005979816
+Version 2 REgister Gas = 0.001661060005979816
+
+///// El ejemplo | PushTokenDemo.sol
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+
+// PUSH Comm Contract Interface
+interface IPUSHCommInterface {
+    function sendNotification(address _channel, address _recipient, bytes calldata _identity) external;
+}
+
+contract PushTokenDemo is ERC20 {
+
+    using Strings for address;
+    using Strings for uint;
+
+    // EPNS COMM ADDRESS ON ETHEREUM KOVAN, CHECK THIS: https://docs.epns.io/developers/developer-tooling/epns-smart-contracts/epns-contract-addresses
+    address public EPNS_COMM_ADDRESS = 0xb3971BCef2D791bc4027BbfedFb47319A4AAaaAa; // 
+
+    constructor() ERC20("Push Token Demo", "PUSHDEMO") {
+        _mint(msg.sender, 1000 * 10 ** uint(decimals()));
+    }
+
+    function transfer(address to, uint amount) override public returns (bool success) {
+        address owner = _msgSender();
+        _transfer(owner, to, amount);
+
+        //"0+3+Hooray! ", msg.sender, " sent ", token amount, " PUSH to you!"
+        IPUSHCommInterface(EPNS_COMM_ADDRESS).sendNotification(
+            0x28400aa592483d6DC6776B82B25dD2E517863050, // from channel
+            to, // to recipient, put address(this) in case you want Broadcast or Subset. For Targetted put the address to which you want to send
+            bytes(
+                string(
+                    // We are passing identity here: https://docs.push.org/developers/developer-guides/sending-notifications/notification-payload-types/notification-standard-advanced/notification-identity
+                    abi.encodePacked(
+                        "0", // this is notification identity: https://docs.push.org/developers/developer-guides/sending-notifications/notification-payload-types/notification-standard-advanced/notification-identity
+                        "+", // segregator
+                        "3", // this is payload type: https://docs.push.org/developers/developer-guides/sending-notifications/notification-payload-types/notification-standard-advanced/notification-payload (1, 3 or 4) = (Broadcast, targetted or subset)
+                        "+", // segregator
+                        "Tranfer Alert", // this is notificaiton title
+                        "+", // segregator
+                        "Hooray! ", // notification body
+                        owner.toHexString(), // notification body
+                        " sent ", // notification body
+                        (amount / (10 ** uint(decimals()))).toString(), // notification body
+                        " PUSH to you!" // notification body
+                    )
+                )
+            )
+        );
+        
+        return true;
+    }
+
+}
+
+
+https://app.push.org/send ----- PRODUCCION
+
+https://medium.com/@sebasguaqueta.eth/una-gu%C3%ADa-f%C3%A1cil-para-entender-c%C3%B3mo-funcionan-las-comunicaciones-descentralizadas-a-trav%C3%A9s-de-push-y-de4cdbc7caf8
+
+
+https://staging.push.org/channels ----- TESTNET
+
+
+https://docs.push.org/developers/developer-guides/sending-notifications/using-subgraph-gasless
+
 
 
 
