@@ -827,10 +827,271 @@ https://staging.push.org/channels ----- TESTNET
 https://docs.push.org/developers/developer-guides/sending-notifications/using-subgraph-gasless
 
 
+Fifth Session
+
+Bogota 11 de Noviembre 2023 Clase 5 Solidity Básico
+
+Cuando se va a realizar la Hackaton, si se va a hacer? Si, regístrate aquí
+https://tally.so/r/wo2eaO
+
+=============
+Asistencia
+ºHenry Velásquez Y. (Bonfire)
+Oscar Riojas TK-0xe582B2aaf93cE495dB591dAE1f5E8ECEF33e214f WLL: 0x1d870f1210e66cba98093682b84d4491Ec04141b
+ºKarlimar Piza Gamboa
+ºDiego Felipe Alarcon Osorio
+ºDaniel Felipe Arevalo Benavides
+ºDaniel Alberto Franco Cabrera
+ºCarlos Andres Monroy Martinez
+ºWilson Mauro Rojas Reales
+ºGustavo Alejandro Moreno Munevar
+ºJose Antonio Viancha Monroy
+ºMiguel Ángel Burgos Rojas. TK 0x4Bb9d5938D6977C1Ef6E6875e3bc7FA596F8801A 
+WLL 0xD95310a95D1698cE0423E4145D58925ED0E74C8b
+ºLuis Miguel Taque Diaz
+ºAdriana Manzano Rojas
+ºJoann Cruz
+ºSantiago Montenegro tk - 0xfCC8316363b1b37B85B9d63a6C940a253B885338 
+Wll: 0xD6baeEe78bd7F36B550D9A64fBc4383dF3AF73de 
+
+ºDannuver Cabezas 0x0443925bd3B13CB62bd2beec06d325d7b889E9CE
+ºAndres Felipe Ramos Reyes 0x526A29B0daBf45a4a5c7587A15BCa97547392fC2
+ºJuan Sebastian Carrera Lozano
+ºAlexander Aponte M.
+ºWilliam Stiven Forero Pardo.   0x91B00Cdecb7341208763453e3586f0173aCe3ffB
+
+ºAndrés Felipe Medina Bernal   0x4Ac05fb296E92c972C328dB176232a10b20b8b04
+ºRocío Elena Grajales Mesa
+ºIvan Santiago Romero Cepeda tk- 0x6Cfa0c12761e4D62224eC6b46a502cC6215F50B9
+CONTRATO- 0x5D6Ae4a2D8114D4627DeFeea44AbB9aDC0f49B8E
+ºJuan Pablo Velasquez Camargo
+ºDaniel Felipe Donoso Castiblanco
+ºJulian Humberto Astroz Restrepo
+ºJuan Leonardo Ramirez Velasquez TK: 0xF1F68fe21a73C507B2747e5C100a0CC202810eE7 W: 0xBDB91F50919b1Ae3F74d8fAa844C69C4f45CbC8D
+ºJuan Sebastian Vargas Ospina
+ºDavid Felipe Millan Mayorga
+ºJuan Sebastian Hurtado Palacios JTK: 0x6d158A8670a5E7379dF9FC4EdA05980A393Bced3
+Wallet: 0x15ef07023FB0C5Eaf3C6BB76915d079e0F5e8470
+ºLuis hernando Martinez Poveda
+ºAndrea Jiménez Guevara (XX asistencias)
+ºHector David Puentes Caceres
+ºSheryll Davina Vargas Ortiz
+ºMiyyer Andres Gaitan
+ºAndres Felipe Carbonell Amaya
+ºTannia Marcela Vega Buitrago
+ºMartha Tatiana Díaz Urrego
+Wallet:0x60f96B78731834dAa395b104AbC126C7cE7fcd32
+Contrato: 0x9a5c00e1cc458450fd5b705a702add399548ad77
+ºOscar Eduardo Jaramillo
+ºJuan Felipe Jimenez Pacheco PJK- 
+0x1E94aA61A9a4828931d62a4307Cf10bC18364d8F
+ºJuan Manuel Perez Rincon
+ºAngélica Guevara Bernal   
+      0x7D41497939490d369338e638C98B9935D7a3FcA8
+ºPaula Alejandra Buitrago Pineda 
+ºAndres Aponte
+ºCristian Chaparro
+Julio Cesar Arango 0x47Cc9Ae1B382B4B6db3cAA500F78208490eB9Ce9 Wallet
+0x7887822803A6cCae4c83CdfAB0C9211c97831fd4 Token JulioCesar JCR
+Wilfredo_Caro 0xAc7e174DF113092dbE2459C0989a7947b449Aa68
+
+ 0xdc7FbbDBd66Ab1896593AdB2F35e8c20C0983c06
+ 0x1d870f1210e66cba98093682b84d4491Ec04141b
+ 0x5526Be6A5d6648FE015c41Ac9a3C077dC6FC632f
+
+=============
+
+ 
+Block
+
+Transaction Properties
+
+- block.coinbase (address payable) Current block miner’s address
+- block.difficulty (uint) Current block difficulty
+- block.number (uint): Current block number
+- blockhash(uint blockNumber) returns (bytes32) Gives hash of the given block and will only work for the 256
+most recent block due to the reason of scalability.
+- block.timestamp (uint): Current block timestamp as seconds since unix epoch
+- gasleft() returns (uint256): Remaining gas
+- msg.sender (address payable) Sender of the message (current call)
+- msg.sig (bytes4) First four bytes of the calldata (i.e. function identifier)
+
+- tx.gasprice (uint) Gas price of the transaction
+- block.gaslimit (uint) Current block gaslimit
+- tx.origin (address payable) Sender of the transaction (full call chain)
+- msg.data (bytes calldata) Complete calldata
+
+Block difficulty: https://2miners.com/es/ethw-network-difficulty , https://www.okx.com/es-es/learn/ethereum-difficulty-bomb
+https://dappnode.com/ Hardware para Staking de Ethereum
+
+==========
+
+//SPDX-License-Identifier:MIT
+pragma solidity ^0.8.16;
+
+contract test_1 {
+
+        address public block_now;
+        uint public block_diff;
+        uint public block_num;
+        bytes32 public block_hash; // tipo de dato para el blockhash
+        uint public time_stamp;
+        uint public gas_left;
+        address public sender;
+        bytes4 public sig_id;
+        uint public gas_limit;
+
+        function update() public {
+
+            block_now = block.coinbase;
+            block_diff = block.difficulty;
+            block_num = block.number;
+            block_hash = blockhash(block_num);
+            time_stamp = block.timestamp;
+            gas_left = gasleft();
+            sender = msg.sender;
+            sig_id = msg.sig;
+            gas_limit = block.gaslimit;
+
+        }
+}
+
+===================================================================================
+
+https://ethereum.org/es/developers/docs/standards/tokens/erc-20/
+
+Tokenomics es la combinación ente «token» y «economía». Se trata de una forma de englobar aquellos elementos que hacen que una criptomoneda sea valiosa e interesante para los inversores. Incluye todos los aspectos, desde cómo se emite, hasta su utilidad, oferta, distribución y demanda, entre otras cosas.
+
+https://docs.openzeppelin.com/contracts/5.x/wizard
+
+ERC-20
+Obligatorias
+Name y symbol
+
+No obligatorias
+Premint: tokens que se crean al iniciar
+Mintable: poder crear mas tokens
+Burnable: quemar tokens
+Pausable: EIP-2612
+Votes: governanza
+
+Tener en cuenta los decimales
+
+https://quickswap.exchange/#/
+https://testnet.unilend.finance/
+https://medium.com/coinosis/c%C3%B3mo-usar-decimales-en-solidity-915f890914ee
+
+Smart contract BAT 
+https://etherscan.io/address/0x0d8775f648430679a709e98d2b0cb6250d2887ef#code
+
+Sobre el crash de FTX aquí les dejo:
+    https://www.criptonoticias.com/negocios/10-claves-entender-que-paso-ftx/
+  Bonfire
+  
+  https://www.youtube.com/watch?v=o92MEv_FlXA&t=12s&ab_channel=UNPOCOMEJOR
+  el dinero explicado en Netflix
+  
+
+
+Sixth Session
+
+
+Curso Solidity Básico Clase 6 | 18 de Noviembre de 2023
+
+Registro Hackathon Web3 https://tally.so/r/wo2eaO
+
+Contrato ERC-721 https://docs.openzeppelin.com/contracts/5.x/erc721
+
+DISCORD ETH BOGOTA https://discord.gg/vXzhJytpTs
+
+https://aragon.org/ -> DAO
+https://www.tally.xyz/ -> DAO
+
+¿Qué son los NFTs? Por DW en Español https://www.youtube.com/watch?v=js32a08YUds
+https://openzeppelin.com/contracts -> Plataforma para verificación de contrato y estandares'p
+https://docs.openzeppelin.com/contracts/5.x/wizard -> Plantilla para contratos ya auditada
+https://web3.storage/login/ ->Para guardar de forma descentralizada 100
+https://www.pinata.cloud/ -> 
+https://www.lighthouse.storage ->Almacenamiento a 100 años/encriptación nativa
+https://files.lighthouse.storage/ -> Almacenamiento desentralizado chevere
+www.jsoneditoronline.org -> Editar archivos json online
+https://docs.opensea.io/docs/metadata-standards ->Seguir un standard para vender NFTs en Opensea
+https://testnets.opensea.io/ ->
+
+CID = Content Identifier (https://docs.ipfs.tech/concepts/content-addressing/)
+
+=======
+https://gateway.lighthouse.storage/ipfs/QmcSRs1iXZt79ggtpdgPxTeEiR9Za7xYPE1K75f2M1QuvV
+
+https://testnets.opensea.io/assets/mumbai/0x10573534c7a97253c7c3074d894700608841754e/1/
+
+Estructura JSON
+
+{
+  "description": "La mejor imagen de ",
+  "external_url": "https://gateway.lighthouse.storage/ipfs/QmZi8MJAfYSB4iK6DkeahEDZgaSmieCY2pEvFD6cy6GKr5",
+  "image": "https://gateway.lighthouse.storage/ipfs/QmZi8MJAfYSB4iK6DkeahEDZgaSmieCY2pEvFD6cy6GKr5",
+  "name": "Picasso"
+}
+
+=======
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract Picasso2 is ERC721, ERC721URIStorage, Ownable {
+    uint256 private _nextTokenId;
+
+    constructor(address initialOwner)
+        ERC721("Picasso2", "PCSS")
+        Ownable(initialOwner)
+    {}
+
+    function safeMint(address to, string memory uri) public onlyOwner {
+        uint256 tokenId = _nextTokenId++;
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, uri);
+    }
+
+    // The following functions are overrides required by Solidity.
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+}
+
+=======
+
+Nuestro activo digital, que puede ser video, audio, contenido propio ...
+Subir el activo digital a IPFS (lighthouse, Web3.storage, pinata.cloud)
+Crear el json con la metadata con el estandar de OpenSea y remplazar las uris
+Subir el json a IPFS (https://gateway.lighthouse.storage/ipfs/"copiar el CID")
+Crear el contrato ERC-721 en open zeppelin
+Ejecutar la función SAFE MINT y decrile la uri de nuestra metadata json 
+Si quiero adjuntarlo en mi billetera  (Verificar los contratos antes)
 
 
 
 
+<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Speedrun Sessions<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>
 
 
 <--Speedrun first session-->
